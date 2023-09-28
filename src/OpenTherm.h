@@ -116,7 +116,6 @@ public:
 	OpenTherm(int inPin = 4, int outPin = 5, bool isSlave = false);
 	~OpenTherm();
 	volatile OpenThermStatus status;
-	void hello() {};
 	void begin(void(*handleInterruptCallback)(void));
 	void begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus));
 #if !defined(__AVR__)
