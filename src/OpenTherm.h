@@ -118,7 +118,7 @@ public:
 	volatile OpenThermStatus status;
 	void begin(void(*handleInterruptCallback)(void));
 	void begin(void(*handleInterruptCallback)(void), void(*processResponseCallback)(unsigned long, OpenThermResponseStatus));
-#if !(defined(ARDUINO)) || defined(ESP8266)
+#if !defined(__AVR__)
 	void begin();
 	void begin(std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction);
 #endif	
@@ -187,7 +187,7 @@ private:
 	void sendBit(bool high);
 	void processResponse();
 	void(*processResponseCallback)(unsigned long, OpenThermResponseStatus);	
-#if !(defined(ARDUINO)) || defined(ESP8266)
+#if !defined(__AVR__)
 	std::function<void(unsigned long, OpenThermResponseStatus)> processResponseFunction;
 #endif
 };

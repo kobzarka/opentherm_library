@@ -4,7 +4,7 @@ Copyright 2023, Ihor Melnyk
 */
 
 #include "OpenTherm.h"
-#if !(defined(ARDUINO)) || defined(ESP8266)
+#if !defined(__AVR__)
 #include "FunctionalInterrupt.h"
 #endif
 
@@ -29,7 +29,7 @@ void OpenTherm::begin(void(*handleInterruptCallback)(void))
 	}
 	else
 	{
-#if !(defined(ARDUINO)) || defined(ESP8266)
+#if !defined(__AVR__)
 		attachInterrupt(digitalPinToInterrupt(inPin), [this]() {
 			this->handleInterrupt();
 		}, CHANGE);
@@ -45,7 +45,7 @@ void OpenTherm::begin(void(*handleInterruptCallback)(void), void(*processRespons
 	this->processResponseCallback = processResponseCallback;
 }
 
-#if !(defined(ARDUINO)) || defined(ESP8266)
+#if !defined(__AVR__)
 void OpenTherm::begin()
 {
 	begin(NULL);
@@ -202,7 +202,7 @@ void OpenTherm::processResponse()
 	if (processResponseCallback != NULL) {
 		processResponseCallback(response, responseStatus);
 	}
-#if !(defined(ARDUINO)) || defined(ESP8266)
+#if !defined(__AVR__)
 	if (this->processResponseFunction != NULL) {
 		processResponseFunction(response, responseStatus);
 	}
