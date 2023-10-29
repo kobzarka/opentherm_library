@@ -240,7 +240,7 @@ void OpenTherm::process()
 	}
 }
 
-bool OpenTherm::parity(unsigned long frame) //odd parity
+static bool OpenTherm::parity(unsigned long frame) //odd parity
 {
 	byte p = 0;
 	while (frame > 0)
@@ -251,18 +251,18 @@ bool OpenTherm::parity(unsigned long frame) //odd parity
 	return (p & 1);
 }
 
-OpenThermMessageType OpenTherm::getMessageType(unsigned long message)
+static OpenThermMessageType OpenTherm::getMessageType(unsigned long message)
 {
 	OpenThermMessageType msg_type = static_cast<OpenThermMessageType>((message >> 28) & 7);
 	return msg_type;
 }
 
-OpenThermMessageID OpenTherm::getDataID(unsigned long frame)
+static OpenThermMessageID OpenTherm::getDataID(unsigned long frame)
 {
 	return (OpenThermMessageID)((frame >> 16) & 0xFF);
 }
 
-unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
+static unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
 {
 	unsigned long request = data;
 	if (type == OpenThermMessageType::WRITE_DATA) {
@@ -273,7 +273,7 @@ unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessag
 	return request;
 }
 
-unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
+static unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
 {
 	unsigned long response = data;
 	response |= ((unsigned long)type) << 28;
@@ -282,14 +282,14 @@ unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessa
 	return response;
 }
 
-bool OpenTherm::isValidResponse(unsigned long response)
+static bool OpenTherm::isValidResponse(unsigned long response)
 {
 	if (parity(response)) return false;
 	byte msgType = (response << 1) >> 29;
 	return msgType == READ_ACK || msgType == WRITE_ACK;
 }
 
-bool OpenTherm::isValidRequest(unsigned long request)
+static bool OpenTherm::isValidRequest(unsigned long request)
 {
 	if (parity(request)) return false;
 	byte msgType = (request << 1) >> 29;
@@ -304,7 +304,7 @@ OpenTherm::~OpenTherm() {
 	end();
 }
 
-const char *OpenTherm::statusToString(OpenThermResponseStatus status)
+static const char *OpenTherm::statusToString(OpenThermResponseStatus status)
 {
 	switch (status) {
 		case NONE:	return "NONE";
@@ -315,7 +315,7 @@ const char *OpenTherm::statusToString(OpenThermResponseStatus status)
 	}
 }
 
-const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
+static const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
 {
 	switch (message_type) {
 		case READ_DATA:	   return "READ_DATA";
@@ -332,58 +332,58 @@ const char *OpenTherm::messageTypeToString(OpenThermMessageType message_type)
 
 //building requests
 
-unsigned long OpenTherm::buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2) {
+static unsigned long OpenTherm::buildSetBoilerStatusRequest(bool enableCentralHeating, bool enableHotWater, bool enableCooling, bool enableOutsideTemperatureCompensation, bool enableCentralHeating2) {
 	unsigned int data = enableCentralHeating | (enableHotWater << 1) | (enableCooling << 2) | (enableOutsideTemperatureCompensation << 3) | (enableCentralHeating2 << 4);
 	data <<= 8;
 	return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Status, data);
 }
 
-unsigned long OpenTherm::buildSetBoilerTemperatureRequest(float temperature) {
+static unsigned long OpenTherm::buildSetBoilerTemperatureRequest(float temperature) {
 	unsigned int data = temperatureToData(temperature);
 	return buildRequest(OpenThermMessageType::WRITE_DATA, OpenThermMessageID::TSet, data);
 }
 
-unsigned long OpenTherm::buildGetBoilerTemperatureRequest() {
+static unsigned long OpenTherm::buildGetBoilerTemperatureRequest() {
 	return buildRequest(OpenThermMessageType::READ_DATA, OpenThermMessageID::Tboiler, 0);
 }
 
 //parsing responses
-bool OpenTherm::isFault(unsigned long response) {
+static bool OpenTherm::isFault(unsigned long response) {
 	return response & 0x1;
 }
 
-bool OpenTherm::isCentralHeatingActive(unsigned long response) {
+static bool OpenTherm::isCentralHeatingActive(unsigned long response) {
 	return response & 0x2;
 }
 
-bool OpenTherm::isHotWaterActive(unsigned long response) {
+static bool OpenTherm::isHotWaterActive(unsigned long response) {
 	return response & 0x4;
 }
 
-bool OpenTherm::isFlameOn(unsigned long response) {
+static bool OpenTherm::isFlameOn(unsigned long response) {
 	return response & 0x8;
 }
 
-bool OpenTherm::isCoolingActive(unsigned long response) {
+static bool OpenTherm::isCoolingActive(unsigned long response) {
 	return response & 0x10;
 }
 
-bool OpenTherm::isDiagnostic(unsigned long response) {
+static bool OpenTherm::isDiagnostic(unsigned long response) {
 	return response & 0x40;
 }
 
-uint16_t OpenTherm::getUInt(const unsigned long response) const {
+static uint16_t OpenTherm::getUInt(const unsigned long response) const {
 	const uint16_t u88 = response & 0xffff;
 	return u88;
 }
 
-float OpenTherm::getFloat(const unsigned long response) const {
+static float OpenTherm::getFloat(const unsigned long response) const {
 	const uint16_t u88 = getUInt(response);
 	const float f = (u88 & 0x8000) ? -(0x10000L - u88) / 256.0f : u88 / 256.0f;
 	return f;
 }
 
-unsigned int OpenTherm::temperatureToData(float temperature) {
+static unsigned int OpenTherm::temperatureToData(float temperature) {
 	if (temperature < 0) temperature = 0;
 	if (temperature > 100) temperature = 100;
 	unsigned int data = (unsigned int)(temperature * 256);
