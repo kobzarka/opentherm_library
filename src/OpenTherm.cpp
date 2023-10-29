@@ -240,7 +240,7 @@ void OpenTherm::process()
 	}
 }
 
-static bool OpenTherm::parity(unsigned long frame) //odd parity
+bool OpenTherm::parity(unsigned long frame) //odd parity
 {
 	byte p = 0;
 	while (frame > 0)
@@ -251,18 +251,18 @@ static bool OpenTherm::parity(unsigned long frame) //odd parity
 	return (p & 1);
 }
 
-static OpenThermMessageType OpenTherm::getMessageType(unsigned long message)
+OpenThermMessageType OpenTherm::getMessageType(unsigned long message)
 {
 	OpenThermMessageType msg_type = static_cast<OpenThermMessageType>((message >> 28) & 7);
 	return msg_type;
 }
 
-static OpenThermMessageID OpenTherm::getDataID(unsigned long frame)
+OpenThermMessageID OpenTherm::getDataID(unsigned long frame)
 {
 	return (OpenThermMessageID)((frame >> 16) & 0xFF);
 }
 
-static unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
+unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
 {
 	unsigned long request = data;
 	if (type == OpenThermMessageType::WRITE_DATA) {
@@ -273,7 +273,7 @@ static unsigned long OpenTherm::buildRequest(OpenThermMessageType type, OpenTher
 	return request;
 }
 
-static unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
+unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThermMessageID id, unsigned int data)
 {
 	unsigned long response = data;
 	response |= ((unsigned long)type) << 28;
@@ -282,14 +282,14 @@ static unsigned long OpenTherm::buildResponse(OpenThermMessageType type, OpenThe
 	return response;
 }
 
-static bool OpenTherm::isValidResponse(unsigned long response)
+bool OpenTherm::isValidResponse(unsigned long response)
 {
 	if (parity(response)) return false;
 	byte msgType = (response << 1) >> 29;
 	return msgType == READ_ACK || msgType == WRITE_ACK;
 }
 
-static bool OpenTherm::isValidRequest(unsigned long request)
+bool OpenTherm::isValidRequest(unsigned long request)
 {
 	if (parity(request)) return false;
 	byte msgType = (request << 1) >> 29;
