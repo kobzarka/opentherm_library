@@ -154,8 +154,8 @@ public:
 	static bool isFlameOn(unsigned long response);
 	static bool isCoolingActive(unsigned long response);
 	static bool isDiagnostic(unsigned long response);
-	static uint16_t getUInt(const unsigned long response) const;
-	static float getFloat(const unsigned long response) const;	
+	static uint16_t getUInt(const unsigned long response);
+	static float getFloat(const unsigned long response);	
 	static unsigned int temperatureToData(float temperature);
 
 	//basic requests
